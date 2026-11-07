@@ -25,6 +25,7 @@ export default function App() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
+    console.log(`Attempting ${isLogin ? 'Login' : 'Signup'} to ${API_URL}`);
     try {
       if (isLogin) {
         const formData = new URLSearchParams();
@@ -33,17 +34,35 @@ export default function App() {
         const res = await axios.post(`${API_URL}/login`, formData, {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
+        console.log('Login successful');
         setToken(res.data.access_token);
         localStorage.setItem('token', res.data.access_token);
         fetchReports(res.data.access_token);
       } else {
-        await axios.post(`${API_URL}/signup`, { username, password });
+        console.log('Sending signup request...', { username });
+        const res = await axios.post(`${API_URL}/signup`, { username, password });
+        console.log('Signup successful', res.data);
         alert('Account created successfully! Please sign in.');
         setIsLogin(true);
       }
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.detail || 'Authentication failed. Please check your credentials or ensure backend is running.');
+      console.error('Auth Error Details:', {
+        message: err.message,
+        code: err.code,
+        status: err.response?.status,
+        data: err.response?.data,
+        config: err.config
+      });
+
+      let errorMsg = 'Authentication failed.';
+      if (err.response?.data?.detail) {
+        errorMsg = err.response.data.detail;
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMsg = `Connection Refused: Cannot reach backend at ${API_URL}. Please ensure your Python server is running on port 8000.`;
+      } else {
+        errorMsg = `${err.message}. Check browser console for details.`;
+      }
+      alert(errorMsg);
     }
   };
 

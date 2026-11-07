@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from models import Base, engine, User, Report
-from auth import get_db, get_password_hash, verify_password, create_access_token, oauth2_scheme, jwt, SECRET_KEY, ALGORITHM
+from auth import get_db, get_password_hash, verify_password, create_access_token, oauth2_scheme, jwt, SECRET_KEY, ALGORITHM, JWTError
 from pydantic import BaseModel
 
 Base.metadata.create_all(bind=engine)
@@ -34,15 +34,23 @@ class ReportCreate(BaseModel):
 
 @app.post("/signup")
 def signup(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.username == user.username).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    hashed_password = get_password_hash(user.password)
-    new_user = User(username=user.username, hashed_password=hashed_password)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return {"message": "User created successfully"}
+    print(f"Signup attempt for user: {user.username}")
+    try:
+        db_user = db.query(User).filter(User.username == user.username).first()
+        if db_user:
+            print(f"Signup failed: User {user.username} already exists")
+            raise HTTPException(status_code=400, detail="Username already registered")
+
+        hashed_password = get_password_hash(user.password)
+        new_user = User(username=user.username, hashed_password=hashed_password)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        print(f"Signup successful for user: {user.username}")
+        return {"message": "User created successfully"}
+    except Exception as e:
+        print(f"Error during signup: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
