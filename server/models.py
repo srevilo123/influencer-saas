@@ -25,5 +25,8 @@ class Report(Base):
     comments = Column(Integer)
     shares = Column(Integer)
     total_paid = Column(Float)
+    hook_retention = Column(Float, default=0.0)
+    drop_off_rate = Column(Float, default=0.0)
+    diagram_markup = Column(String, default="")
     user_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="reports")
