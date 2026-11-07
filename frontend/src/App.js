@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck, Menu, X, LogIn, UserPlus, User, CreditCard, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck, Menu, X, LogIn, UserPlus, User, CreditCard, ChevronDown, HelpCircle, Upload, Cpu, ExternalLink } from 'lucide-react';
 
 const LOCAL_API = 'http://localhost:8000';
 const PROD_API = 'https://influencer-backend-fiv8.onrender.com';
@@ -24,6 +24,33 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // FTUE / Tutorial State
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  const tutorialSteps = [
+    {
+      title: "1. Upload Platform Screenshots",
+      description: "Easily drag and drop engagement metrics from TikTok, Instagram, or YouTube to automatically populate campaign reports.",
+      icon: <Upload size={32} className="text-[#1f2de6]" />
+    },
+    {
+      title: "2. Generate AI Performance Diagrams",
+      description: "Our backend automatically converts raw views, likes, and CPE into beautiful, brand-ready visual charts and PDF exports.",
+      icon: <Cpu size={32} className="text-[#1f2de6]" />
+    },
+    {
+      title: "3. Open Reports in Separate Tabs",
+      description: "Click on any verified report in your vault to open its standalone link and share detailed analytics directly with talent managers.",
+      icon: <ExternalLink size={32} className="text-[#1f2de6]" />
+    },
+    {
+      title: "4. Manage Subscriptions & Settings",
+      description: "Access your account tier, top up credits, and configure custom workspace integrations in the Settings tab.",
+      icon: <Settings size={32} className="text-[#1f2de6]" />
+    }
+  ];
 
   // Close user dropdown when clicking outside
   useEffect(() => {
@@ -67,6 +94,13 @@ export default function App() {
         setToken(res.data.access_token);
         localStorage.setItem('token', res.data.access_token);
         fetchReports(res.data.access_token, currentApi);
+
+        // Trigger FTUE Onboarding Tour on first login if not completed
+        const completed = localStorage.getItem('hasCompletedTutorial');
+        if (!completed) {
+          setShowTutorial(true);
+          setTutorialStep(0);
+        }
       } else {
         alert('Account created successfully! Please sign in.');
         setIsLogin(true);
@@ -83,6 +117,13 @@ export default function App() {
           setToken(fallbackRes.data.access_token);
           localStorage.setItem('token', fallbackRes.data.access_token);
           fetchReports(fallbackRes.data.access_token, fallbackUrl);
+
+          // Trigger FTUE Onboarding Tour on first login if not completed
+          const completed = localStorage.getItem('hasCompletedTutorial');
+          if (!completed) {
+            setShowTutorial(true);
+            setTutorialStep(0);
+          }
         } else {
           alert('Account created successfully on cloud server! Please sign in.');
           setIsLogin(true);
@@ -145,6 +186,31 @@ export default function App() {
     } catch (err) {
       alert('Failed to create report');
     }
+  };
+
+  const closeTutorial = () => {
+    localStorage.setItem('hasCompletedTutorial', 'true');
+    setShowTutorial(false);
+  };
+
+  const nextStep = () => {
+    if (tutorialStep < tutorialSteps.length - 1) {
+      setTutorialStep(tutorialStep + 1);
+    } else {
+      closeTutorial();
+    }
+  };
+
+  const prevStep = () => {
+    if (tutorialStep > 0) {
+      setTutorialStep(tutorialStep - 1);
+    }
+  };
+
+  const startTutorial = () => {
+    setTutorialStep(0);
+    setShowTutorial(true);
+    if (mobileMenuOpen) setMobileMenuOpen(false);
   };
 
   if (!token) {
@@ -342,6 +408,9 @@ export default function App() {
             <button onClick={() => { setActiveTab('settings'); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition min-h-[44px] ${activeTab === 'settings' ? 'bg-[#e2e5ea] text-[#0b0c0e]' : 'text-[#5d6470] hover:text-[#0b0c0e] hover:bg-[#eef0f3]/50'}`}>
               <Settings size={18} /> Settings
             </button>
+            <button onClick={startTutorial} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition min-h-[44px] text-[#5d6470] hover:text-[#0b0c0e] hover:bg-[#eef0f3]/50">
+              <HelpCircle size={18} /> Take Onboarding Tour
+            </button>
           </nav>
         </div>
         <button onClick={() => { setToken(''); localStorage.removeItem('token'); }} className="text-sm text-[#5d6470] hover:text-[#0b0c0e] text-left px-4 py-3 rounded-xl transition hover:bg-[#eef0f3] min-h-[44px] flex items-center">
@@ -524,6 +593,50 @@ export default function App() {
                 <button type="submit" className="w-full md:w-auto bg-[#1f2de6] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#1823b8] transition shadow-sm min-h-[44px]">Save Report</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Interactive FTUE Onboarding Tour Modal */}
+      {showTutorial && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-md p-6 md:p-8 rounded-3xl shadow-2xl border border-[#e2e5ea] relative text-center">
+            <button onClick={closeTutorial} className="absolute top-4 right-4 text-[#5d6470] hover:text-[#0b0c0e] p-2 rounded-xl">
+              <X size={20} />
+            </button>
+            <div className="w-16 h-16 bg-[#1f2de6]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+              {tutorialSteps[tutorialStep].icon}
+            </div>
+            <h3 className="text-xl font-semibold text-[#0b0c0e] mb-2">{tutorialSteps[tutorialStep].title}</h3>
+            <p className="text-sm text-[#5d6470] leading-relaxed mb-8">{tutorialSteps[tutorialStep].description}</p>
+
+            <div className="flex items-center justify-between pt-4 border-t border-[#e2e5ea]">
+              <button
+                onClick={prevStep}
+                disabled={tutorialStep === 0}
+                className={`text-sm font-medium px-4 py-2 rounded-xl transition ${tutorialStep === 0 ? 'text-[#e2e5ea] cursor-not-allowed' : 'text-[#5d6470] hover:text-[#0b0c0e]'}`}
+              >
+                Previous
+              </button>
+
+              <div className="flex gap-1.5">
+                {tutorialSteps.map((_, idx) => (
+                  <div key={idx} className={`w-2 h-2 rounded-full transition-all ${idx === tutorialStep ? 'w-6 bg-[#1f2de6]' : 'bg-[#e2e5ea]'}`}></div>
+                ))}
+              </div>
+
+              <button
+                onClick={nextStep}
+                className="bg-[#1f2de6] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#1823b8] transition shadow-sm"
+              >
+                {tutorialStep === tutorialSteps.length - 1 ? 'Finish Tour' : 'Next'}
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <button onClick={closeTutorial} className="text-xs text-[#5d6470] hover:underline">
+                Skip Tour
+              </button>
+            </div>
           </div>
         </div>
       )}
