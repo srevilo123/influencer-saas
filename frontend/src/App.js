@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck, Menu, X, LogIn, UserPlus } from 'lucide-react';
 
 const LOCAL_API = 'http://localhost:8000';
 const PROD_API = 'https://influencer-backend-fiv8.onrender.com';
@@ -101,7 +101,14 @@ export default function App() {
     if (token) fetchReports(token);
   }, [token]);
 
-  const handleCreateReport = async (e) => {
+  const handleProtectedAction = (actionCallback) => {
+    if (!token) {
+      alert('Please sign in or create an account to create reports and projects.');
+      setIsLogin(true);
+      return;
+    }
+    actionCallback();
+  };
     e.preventDefault();
     try {
       await axios.post(`${currentApi}/reports`, {
@@ -138,10 +145,21 @@ export default function App() {
               <div className="w-9 h-9 md:w-10 md:h-10 bg-[#1f2de6] text-white rounded-xl flex items-center justify-center font-bold text-base md:text-lg shadow-sm">I</div>
               <span className="font-semibold text-lg md:text-xl tracking-tight">InfluencerOS</span>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-[#5d6470] hidden md:inline">Already tracking ROI?</span>
-              <button onClick={() => setIsLogin(true)} className="text-sm font-medium hover:text-[#1f2de6] transition min-h-[44px] px-2 flex items-center">Sign In</button>
-            </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-[#5d6470] hidden md:inline">Already tracking ROI?</span>
+                <button
+                  onClick={() => setIsLogin(true)}
+                  className="bg-white border border-[#e2e5ea] text-[#0b0c0e] hover:bg-[#eef0f3] px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm min-h-[44px]"
+                >
+                  <LogIn size={16} className="text-[#1f2de6]" /> Sign In
+                </button>
+                <button
+                  onClick={() => setIsLogin(false)}
+                  className="bg-[#1f2de6] text-white hover:bg-[#1823b8] px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm min-h-[44px]"
+                >
+                  <UserPlus size={16} /> Sign Up
+                </button>
+              </div>
           </div>
         </header>
 
@@ -206,9 +224,16 @@ export default function App() {
               </form>
 
               <div className="mt-6 pt-6 border-t border-[#e2e5ea] text-center">
-                <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-[#5d6470] hover:text-[#0b0c0e] transition min-h-[44px] px-4 flex items-center justify-center mx-auto">
-                  {isLogin ? "Don't have an account? <span className='text-[#1f2de6] font-medium ml-1'>Sign Up</span>" : "Already have an account? <span className='text-[#1f2de6] font-medium ml-1'>Sign In</span>"}
-                  {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-sm text-[#5d6470] hover:text-[#0b0c0e] transition min-h-[44px] px-4 flex items-center justify-center mx-auto gap-1"
+                >
+                  {isLogin ? (
+                    <>Don't have an account? <span className="text-[#1f2de6] font-medium ml-1">Sign Up</span></>
+                  ) : (
+                    <>Already have an account? <span className="text-[#1f2de6] font-medium ml-1">Sign In</span></>
+                  )}
                 </button>
               </div>
             </div>
