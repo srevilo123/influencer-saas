@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__plugin_claude-mem_mcp-search__work_state_write"
+      "mcp__plugin_claude-mem_mcp-search__work_state_write",
+      "mcp__plugin_claude-mem_mcp-search__work_state_read"
     ]
   }
 }
