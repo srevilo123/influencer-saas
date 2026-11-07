@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck, Menu, X, LogIn, UserPlus } from 'lucide-react';
+import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck, Menu, X, LogIn, UserPlus, User, CreditCard, ChevronDown } from 'lucide-react';
 
 const LOCAL_API = 'http://localhost:8000';
 const PROD_API = 'https://influencer-backend-fiv8.onrender.com';
@@ -22,6 +22,19 @@ export default function App() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [currentApi, setCurrentApi] = useState(API_URL);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Form State
   const [campaignName, setCampaignName] = useState('');
@@ -144,21 +157,21 @@ export default function App() {
               <div className="w-9 h-9 md:w-10 md:h-10 bg-[#1f2de6] text-white rounded-xl flex items-center justify-center font-bold text-base md:text-lg shadow-sm">I</div>
               <span className="font-semibold text-lg md:text-xl tracking-tight">InfluencerOS</span>
             </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-[#5d6470] hidden md:inline">Already tracking ROI?</span>
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className="bg-white border border-[#e2e5ea] text-[#0b0c0e] hover:bg-[#eef0f3] px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm min-h-[44px]"
-                >
-                  <LogIn size={16} className="text-[#1f2de6]" /> Sign In
-                </button>
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className="bg-[#1f2de6] text-white hover:bg-[#1823b8] px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm min-h-[44px]"
-                >
-                  <UserPlus size={16} /> Sign Up
-                </button>
-              </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-[#5d6470] hidden md:inline">Already tracking ROI?</span>
+              <button
+                onClick={() => setIsLogin(true)}
+                className="bg-white border border-[#e2e5ea] text-[#0b0c0e] hover:bg-[#eef0f3] px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm min-h-[44px]"
+              >
+                <LogIn size={16} className="text-[#1f2de6]" /> Sign In
+              </button>
+              <button
+                onClick={() => setIsLogin(false)}
+                className="bg-[#1f2de6] text-white hover:bg-[#1823b8] px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm min-h-[44px]"
+              >
+                <UserPlus size={16} /> Sign Up
+              </button>
+            </div>
           </div>
         </header>
 
