@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const LOCAL_API = 'http://localhost:8000';
+const PROD_API = 'https://influencer-backend-fiv8.onrender.com';
+
+const API_URL = process.env.REACT_APP_API_URL || (
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? LOCAL_API
+    : PROD_API
+);
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -13,6 +20,7 @@ export default function App() {
   const [reports, setReports] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [currentApi, setCurrentApi] = useState(API_URL);
 
   // Form State
   const [campaignName, setCampaignName] = useState('');
@@ -23,57 +31,70 @@ export default function App() {
   const [shares, setShares] = useState('');
   const [totalPaid, setTotalPaid] = useState('');
 
+  const sendAuthRequest = async (url, isLoginMode) => {
+    if (isLoginMode) {
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+      return await axios.post(`${url}/login`, formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+    } else {
+      return await axios.post(`${url}/signup`, { username, password });
+    }
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
-    console.log(`Attempting ${isLogin ? 'Login' : 'Signup'} to ${API_URL}`);
+    console.log(`Attempting ${isLogin ? 'Login' : 'Signup'} to ${currentApi}`);
     try {
+      const res = await sendAuthRequest(currentApi, isLogin);
       if (isLogin) {
-        const formData = new URLSearchParams();
-        formData.append('username', username);
-        formData.append('password', password);
-        const res = await axios.post(`${API_URL}/login`, formData, {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        });
-        console.log('Login successful');
         setToken(res.data.access_token);
         localStorage.setItem('token', res.data.access_token);
-        fetchReports(res.data.access_token);
+        fetchReports(res.data.access_token, currentApi);
       } else {
-        console.log('Sending signup request...', { username });
-        const res = await axios.post(`${API_URL}/signup`, { username, password });
-        console.log('Signup successful', res.data);
         alert('Account created successfully! Please sign in.');
         setIsLogin(true);
       }
     } catch (err) {
-      console.error('Auth Error Details:', {
-        message: err.message,
-        code: err.code,
-        status: err.response?.status,
-        data: err.response?.data,
-        config: err.config
-      });
+      console.warn(`Primary API (${currentApi}) failed:`, err.message);
 
-      let errorMsg = 'Authentication failed.';
-      if (err.response?.data?.detail) {
-        errorMsg = err.response.data.detail;
-      } else if (err.code === 'ERR_NETWORK') {
-        errorMsg = `Connection Refused: Cannot reach backend at ${API_URL}. Please ensure your Python server is running on port 8000.`;
-      } else {
-        errorMsg = `${err.message}. Check browser console for details.`;
+      // If local server refused connection, try falling back to Production Render API
+      const fallbackUrl = currentApi === LOCAL_API ? PROD_API : LOCAL_API;
+      console.log(`Attempting fallback to ${fallbackUrl}...`);
+
+      try {
+        const fallbackRes = await sendAuthRequest(fallbackUrl, isLogin);
+        setCurrentApi(fallbackUrl); // Save working API URL
+        if (isLogin) {
+          setToken(fallbackRes.data.access_token);
+          localStorage.setItem('token', fallbackRes.data.access_token);
+          fetchReports(fallbackRes.data.access_token, fallbackUrl);
+        } else {
+          alert('Account created successfully on cloud server! Please sign in.');
+          setIsLogin(true);
+        }
+      } catch (fallbackErr) {
+        console.error('Both Primary and Fallback APIs failed:', fallbackErr);
+        const detail = err.response?.data?.detail || fallbackErr.response?.data?.detail;
+        if (detail) {
+          alert(detail);
+        } else {
+          alert(`Authentication failed.\n\nLocal Backend: ${err.message}\nCloud Backend: ${fallbackErr.message}\n\nIf running locally, please ensure 'python server/main.py' is running.`);
+        }
       }
-      alert(errorMsg);
     }
   };
 
-  const fetchReports = async (currentToken) => {
+  const fetchReports = async (currentToken, apiEndpoint = currentApi) => {
     try {
-      const res = await axios.get(`${API_URL}/reports`, {
+      const res = await axios.get(`${apiEndpoint}/reports`, {
         headers: { Authorization: `Bearer ${currentToken || token}` }
       });
       setReports(res.data);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch reports:', err);
     }
   };
 
@@ -84,7 +105,7 @@ export default function App() {
   const handleCreateReport = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/reports`, {
+      await axios.post(`${currentApi}/reports`, {
         campaign_name: campaignName,
         platform,
         views: Number(views),
@@ -107,6 +128,7 @@ export default function App() {
       alert('Failed to create report');
     }
   };
+
 
   if (!token) {
     return (
