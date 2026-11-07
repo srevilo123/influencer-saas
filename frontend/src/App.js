@@ -101,15 +101,14 @@ export default function App() {
     if (token) fetchReports(token);
   }, [token]);
 
-  const handleProtectedAction = (actionCallback) => {
+  const handleCreateReport = async (e) => {
+    e.preventDefault();
     if (!token) {
-      alert('Please sign in or create an account to create reports and projects.');
+      alert('Please sign in or create an account to create reports.');
+      setShowCreateModal(false);
       setIsLogin(true);
       return;
     }
-    actionCallback();
-  };
-    e.preventDefault();
     try {
       await axios.post(`${currentApi}/reports`, {
         campaign_name: campaignName,
@@ -349,7 +348,14 @@ export default function App() {
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight capitalize">{activeTab}</h1>
             <p className="text-[#5d6470] text-sm mt-1">Manage and review your live influencer campaigns.</p>
           </div>
-          <button onClick={() => setShowCreateModal(true)} className="w-full md:w-auto bg-[#1f2de6] text-white px-5 py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#1823b8] transition shadow-sm min-h-[44px]">
+          <button onClick={() => {
+            if (!token) {
+              alert('Please sign in or create an account to create projects.');
+              setIsLogin(true);
+              return;
+            }
+            setShowCreateModal(true);
+          }} className="w-full md:w-auto bg-[#1f2de6] text-white px-5 py-3 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#1823b8] transition shadow-sm min-h-[44px]">
             <Plus size={18} /> Create New Report
           </button>
         </div>
@@ -361,7 +367,14 @@ export default function App() {
                 <h2 className="text-lg md:text-xl font-semibold">Welcome back</h2>
                 <p className="text-[#5d6470] text-sm mt-1">You have <span className="font-medium text-[#0b0c0e]">{reports.length}</span> active campaign reports saved in your vault.</p>
               </div>
-              <button onClick={() => setShowCreateModal(true)} className="w-full md:w-auto bg-[#eef0f3] text-[#0b0c0e] px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#e2e5ea] transition min-h-[44px] flex items-center justify-center">
+              <button onClick={() => {
+                if (!token) {
+                  alert('Please sign in or create an account to create campaigns.');
+                  setIsLogin(true);
+                  return;
+                }
+                setShowCreateModal(true);
+              }} className="w-full md:w-auto bg-[#eef0f3] text-[#0b0c0e] px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#e2e5ea] transition min-h-[44px] flex items-center justify-center">
                 New Campaign
               </button>
             </div>
