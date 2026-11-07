@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { LayoutDashboard, FileText, Image as ImageIcon, Settings, Plus, TrendingUp, DollarSign, Eye, Heart, MessageCircle, Share2 } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://influencer-backend-fiv8.onrender.com';
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
