@@ -3,8 +3,8 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from .models import Base, engine, User, Report
-from .auth import get_db, get_password_hash, verify_password, create_access_token, oauth2_scheme, jwt, SECRET_KEY, ALGORITHM
+from models import Base, engine, User, Report
+from auth import get_db, get_password_hash, verify_password, create_access_token, oauth2_scheme, jwt, SECRET_KEY, ALGORITHM
 from pydantic import BaseModel
 
 Base.metadata.create_all(bind=engine)

@@ -3,7 +3,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from .models import SessionLocal
+from models import SessionLocal
 
 SECRET_KEY = "SUPER_SECRET_KEY_CHANGE_ME"
 ALGORITHM = "HS256"
