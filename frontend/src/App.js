@@ -33,6 +33,10 @@ export default function App() {
     setTimeout(() => setToast(null), 4000);
   };
 
+  // FTUE / Tutorial State
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
   // Multimodal AI Upload & Extraction State
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
