@@ -268,7 +268,7 @@ export default function App() {
   const handleCreateReport = async (e) => {
     e.preventDefault();
     if (!token) {
-      alert('Please sign in or create an account to create reports.');
+      showToast('Please sign in to create reports.', 'error');
       setShowCreateModal(false);
       setIsLogin(true);
       return;
@@ -293,8 +293,9 @@ export default function App() {
       setComments('');
       setShares('');
       setTotalPaid('');
+      showToast('Report created successfully!');
     } catch (err) {
-      alert('Failed to create report');
+      showToast('Failed to create report', 'error');
     }
   };
 
@@ -637,7 +638,7 @@ export default function App() {
               <LayoutDashboard size={18} /> Dashboard
             </button>
             <button onClick={() => { setActiveTab('reports'); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition min-h-[44px] ${activeTab === 'reports' ? 'bg-[#e2e5ea] text-[#0b0c0e]' : 'text-[#5d6470] hover:text-[#0b0c0e] hover:bg-[#eef0f3]/50'}`}>
-              <FileText size={18} /> My Reports
+              <FileText size={18} /> Reports
             </button>
             <button onClick={() => { setActiveTab('gallery'); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition min-h-[44px] ${activeTab === 'gallery' ? 'bg-[#e2e5ea] text-[#0b0c0e]' : 'text-[#5d6470] hover:text-[#0b0c0e] hover:bg-[#eef0f3]/50'}`}>
               <ImageIcon size={18} /> Brand Gallery
@@ -696,17 +697,17 @@ export default function App() {
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#e2e5ea] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg md:text-xl font-semibold">Welcome back</h2>
-                <p className="text-[#5d6470] text-sm mt-1">You have <span className="font-medium text-[#0b0c0e]">{reports.length}</span> active campaign reports saved in your vault.</p>
+                <p className="text-[#5d6470] text-sm mt-1">You have <span className="font-medium text-[#0b0c0e]">{reports.length}</span> active generated reports saved in your workspace.</p>
               </div>
               <button onClick={() => {
                 if (!token) {
-                  alert('Please sign in or create an account to create campaigns.');
+                  showToast('Please sign in to create reports.', 'error');
                   setIsLogin(true);
                   return;
                 }
                 setShowCreateModal(true);
               }} className="w-full md:w-auto bg-[#eef0f3] text-[#0b0c0e] px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#e2e5ea] transition min-h-[44px] flex items-center justify-center">
-                New Campaign
+                Create Report
               </button>
             </div>
             <h3 className="text-lg font-semibold mt-8 mb-4">Recent Reports</h3>
@@ -781,16 +782,36 @@ export default function App() {
         )}
 
         {activeTab === 'gallery' && (
-          <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#e2e5ea] shadow-sm">
-            <h3 className="text-lg font-semibold mb-2">Brand Gallery</h3>
-            <p className="text-[#5d6470] text-sm">Brand gallery showcases partner logos and historical collaborations across multiple networks.</p>
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#e2e5ea] shadow-sm space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Projects & Brand Gallery</h3>
+              <p className="text-[#5d6470] text-sm">Review all ingestion workspaces and verified brand collaboration projects.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {reports.map((r) => (
+                <div key={r.id} onClick={() => setSelectedReport(r)} className="bg-[#eef0f3]/40 p-5 rounded-2xl border border-[#e2e5ea] cursor-pointer hover:border-[#1f2de6] transition">
+                  <div className="font-semibold text-base mb-1">{r.campaign_name}</div>
+                  <div className="text-xs text-[#5d6470] mb-3">Platform: {r.platform}</div>
+                  <div className="text-xs text-[#1f2de6] font-medium">View Report →</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#e2e5ea] shadow-sm">
-            <h3 className="text-lg font-semibold mb-2">Account Settings</h3>
-            <p className="text-[#5d6470] text-sm">Manage your profile, security tokens, and organization preferences.</p>
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-[#e2e5ea] shadow-sm space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Workspace Settings</h3>
+              <p className="text-[#5d6470] text-sm">Configure your API endpoint, security tokens, and organization preferences.</p>
+            </div>
+            <div className="space-y-4 max-w-md">
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-[#5d6470] mb-1">Active Backend API Endpoint</label>
+                <input type="text" value={currentApi} onChange={(e) => setCurrentApi(e.target.value)} className="w-full rounded-xl border border-[#e2e5ea] px-4 py-3 text-sm bg-[#eef0f3]/50 focus:outline-none focus:ring-2 focus:ring-[#1f2de6]" />
+              </div>
+              <button onClick={() => showToast('Settings updated successfully!')} className="bg-[#1f2de6] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#1823b8] transition">Save Changes</button>
+            </div>
           </div>
         )}
       </div>
@@ -878,6 +899,14 @@ export default function App() {
           </div>
         </div>
       )}
+      {/* Toast Notification Container */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl shadow-xl text-sm font-medium transition-all transform flex items-center gap-3 ${toast.type === 'error' ? 'bg-rose-600 text-white' : 'bg-[#0b0c0e] text-white'}`}>
+          {toast.type === 'error' ? <X size={18} /> : <CheckCircle2 size={18} className="text-[#1f2de6]" />}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       {/* Interactive FTUE Onboarding Tour Modal */}
       {showTutorial && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
