@@ -25,9 +25,13 @@ export default function App() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // FTUE / Tutorial State
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
+  // Toast Notification State
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   // Multimodal AI Upload & Extraction State
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -106,7 +110,7 @@ export default function App() {
 
   const processScreenshotWithAI = async () => {
     if (!previewImage) {
-      alert('Please select or drop an analytics screenshot first.');
+      showToast('Please select or drop an analytics screenshot first.', 'error');
       return;
     }
     setUploadingImage(true);
@@ -127,11 +131,11 @@ export default function App() {
       setPreviewImage(null);
       setUploadingImage(false);
       fetchReports(token);
-      alert('Multimodal AI successfully extracted metrics and generated creator funnel diagram!');
+      showToast('Multimodal AI successfully extracted metrics and generated creator funnel report!');
     } catch (err) {
       console.error('AI extraction failed:', err);
       setUploadingImage(false);
-      alert('AI extraction failed. Please ensure backend is running.');
+      showToast('AI extraction failed. Please ensure backend is running.', 'error');
     }
   };
 
