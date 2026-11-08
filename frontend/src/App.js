@@ -506,7 +506,7 @@ export default function App() {
                   <p className="text-xs font-semibold uppercase tracking-wider text-[#5d6470] mb-3">Funnel Node Tree Diagram</p>
                   <div className="bg-[#0b0c0e] text-white p-4 rounded-xl font-mono text-xs overflow-x-auto space-y-2">
                     <div className="text-[#1f2de6] font-bold">graph TD</div>
-                    <div className="pl-4">A[Views: {r.views.toLocaleString()}] -->|Hook retention {r.hook_retention || 64.2}%| B[Engagements: {totalEngagements.toLocaleString()}]</div>
+                    <div className="pl-4">A[Views: {(r.views || 0).toLocaleString()}] -->|Hook retention {r.hook_retention || 64.2}%| B[Engagements: {totalEngagements.toLocaleString()}]</div>
                     <div className="pl-4">B -->|CPE ${cpe}| C[Brand ROI Conversion]</div>
                   </div>
                 </div>
@@ -724,8 +724,8 @@ export default function App() {
                       <span className="text-xs px-3 py-1 rounded-full bg-[#eef0f3] text-[#5d6470] font-medium">{r.platform}</span>
                     </div>
                     <div className="flex justify-between text-sm text-[#5d6470] pt-4 border-t border-[#eef0f3]">
-                      <span>Views: <strong className="text-[#0b0c0e]">{r.views.toLocaleString()}</strong></span>
-                      <span>Total Paid: <strong className="text-[#0b0c0e]">${r.total_paid}</strong></span>
+                      <span>Views: <strong className="text-[#0b0c0e]">{(r.views || 0).toLocaleString()}</strong></span>
+                      <span>Total Paid: <strong className="text-[#0b0c0e]">${r.total_paid || 0}</strong></span>
                     </div>
                   </div>
                 ))
@@ -745,8 +745,8 @@ export default function App() {
                     <span className="text-xs px-2.5 py-1 rounded-full bg-[#eef0f3] font-medium">{r.platform}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm text-[#5d6470] my-3 pt-3 border-t border-[#eef0f3]">
-                    <div>Views: <span className="font-medium text-[#0b0c0e]">{r.views.toLocaleString()}</span></div>
-                    <div>Paid: <span className="font-medium text-[#0b0c0e]">${r.total_paid}</span></div>
+                    <div>Views: <span className="font-medium text-[#0b0c0e]">{(r.views || 0).toLocaleString()}</span></div>
+                    <div>Paid: <span className="font-medium text-[#0b0c0e]">${r.total_paid || 0}</span></div>
                   </div>
                   <button className="w-full mt-2 bg-[#eef0f3] text-[#0b0c0e] py-2 rounded-xl text-sm font-medium hover:bg-[#e2e5ea] transition min-h-[44px]">View Full Report</button>
                 </div>
@@ -770,8 +770,8 @@ export default function App() {
                     <tr key={r.id} className="hover:bg-[#eef0f3]/20 transition">
                       <td className="p-6 font-medium text-[#0b0c0e]">{r.campaign_name}</td>
                       <td className="p-6 text-[#5d6470]">{r.platform}</td>
-                      <td className="p-6 text-[#5d6470]">{r.views.toLocaleString()}</td>
-                      <td className="p-6 text-[#5d6470]">${r.total_paid}</td>
+                      <td className="p-6 text-[#5d6470]">{(r.views || 0).toLocaleString()}</td>
+                      <td className="p-6 text-[#5d6470]">${r.total_paid || 0}</td>
                       <td className="p-6"><button onClick={() => setSelectedReport(r)} className="text-[#1f2de6] font-medium hover:underline min-h-[44px] flex items-center">View Report</button></td>
                     </tr>
                   ))}
